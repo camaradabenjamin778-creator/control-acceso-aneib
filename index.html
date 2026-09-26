@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -15,13 +14,11 @@
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
-
   <style>
 
     * {
       box-sizing: border-box;
     }
-
 
     body {
       margin: 0;
@@ -30,7 +27,6 @@
       color: #111;
     }
 
-
     header {
       background: #111;
       color: white;
@@ -38,12 +34,10 @@
       text-align: center;
     }
 
-
     header h1 {
       margin: 0;
       font-size: 28px;
     }
-
 
     .contenedor {
       width: 100%;
@@ -51,7 +45,6 @@
       margin: auto;
       padding: 25px;
     }
-
 
     .contador {
       background: white;
@@ -62,18 +55,15 @@
       box-shadow: 0 3px 12px rgba(0,0,0,0.08);
     }
 
-
     .contadorNumero {
       font-size: 55px;
       font-weight: bold;
     }
 
-
     .contadorTexto {
       font-size: 18px;
       color: #666;
     }
-
 
     button {
       border: none;
@@ -84,7 +74,6 @@
       cursor: pointer;
     }
 
-
     .botonEscanear {
       width: 100%;
       background: #111;
@@ -92,13 +81,11 @@
       margin-bottom: 20px;
     }
 
-
     .botonCerrar {
       width: 100%;
       background: #ddd;
       margin-top: 15px;
     }
-
 
     .panel {
       background: white;
@@ -108,11 +95,9 @@
       box-shadow: 0 3px 12px rgba(0,0,0,0.08);
     }
 
-
     .panel h2 {
       margin-top: 0;
     }
-
 
     #lectorQR {
       width: 100%;
@@ -120,22 +105,17 @@
       margin: auto;
     }
 
-
     #resultado {
       display: none;
       position: fixed;
       inset: 0;
       z-index: 1000;
-
       align-items: center;
       justify-content: center;
-
       flex-direction: column;
-
       text-align: center;
       padding: 30px;
     }
-
 
     #resultado.verde {
       display: flex;
@@ -143,19 +123,16 @@
       color: white;
     }
 
-
     #resultado.rojo {
       display: flex;
       background: #d62828;
       color: white;
     }
 
-
     #resultado .icono {
       font-size: 90px;
       margin-bottom: 20px;
     }
-
 
     #resultado .mensaje {
       font-size: 35px;
@@ -163,13 +140,11 @@
       white-space: pre-line;
     }
 
-
     #resultado button {
       margin-top: 35px;
       background: white;
       color: #111;
     }
-
 
     #busqueda {
       width: 100%;
@@ -180,40 +155,33 @@
       margin-bottom: 15px;
     }
 
-
     .persona {
       border-top: 1px solid #ddd;
       padding: 15px 0;
     }
-
 
     .personaNombre {
       font-weight: bold;
       font-size: 19px;
     }
 
-
     .personaDatos {
       color: #666;
       margin: 5px 0;
     }
-
 
     .estado {
       font-weight: bold;
       margin: 10px 0;
     }
 
-
     .estado.ingresado {
       color: #159447;
     }
 
-
     .estado.pendiente {
       color: #d28b00;
     }
-
 
     .botonDeshacer {
       background: #ddd;
@@ -221,13 +189,11 @@
       padding: 10px 15px;
     }
 
-
     .ultimo {
       background: #f0f0f0;
       border-radius: 10px;
       padding: 15px;
     }
-
 
     .oculto {
       display: none;
@@ -240,16 +206,12 @@
 
 <body>
 
-
   <header>
-
     <h1>Control de Acceso ANEIB</h1>
-
   </header>
 
 
   <div class="contenedor">
-
 
     <div class="contador">
 
@@ -303,7 +265,6 @@
       <div id="resultados"></div>
 
     </div>
-
 
   </div>
 
@@ -360,9 +321,12 @@
 
   <script>
 
+    // =====================================================
+    // URL DE TU GOOGLE APPS SCRIPT
+    // =====================================================
 
     const API_URL =
-      "https://script.google.com/macros/s/AKfycbz9ReIHszmHMsyjp1CkG98saWZ8tw6NqSsvVY2gxaEXnJHbBNi9YTBX9dIW4zY7MvdjQ/exec";
+      "https://script.google.com/macros/s/AKfycbzg1JIAmrhQLwXWDEAuioTNv0zSJz3TMWrc-fQDXRF16nhkCJ7BZCg4Mw6G6wOV3oRUZw/exec";
 
 
     let scanner = null;
@@ -371,6 +335,10 @@
 
     let procesando = false;
 
+
+    // =====================================================
+    // CONEXIÓN CON APPS SCRIPT
+    // =====================================================
 
     async function api(accion, parametros = {}) {
 
@@ -401,6 +369,10 @@
     }
 
 
+    // =====================================================
+    // CONTADOR
+    // =====================================================
+
     async function actualizarContador() {
 
       try {
@@ -419,12 +391,19 @@
 
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          "Error actualizando contador:",
+          error
+        );
 
       }
 
     }
 
+
+    // =====================================================
+    // ABRIR ESCÁNER
+    // =====================================================
 
     function abrirScanner() {
 
@@ -483,6 +462,10 @@
     }
 
 
+    // =====================================================
+    // CERRAR ESCÁNER
+    // =====================================================
+
     async function cerrarScanner() {
 
       if (
@@ -517,6 +500,10 @@
     }
 
 
+    // =====================================================
+    // QR DETECTADO
+    // =====================================================
+
     async function qrDetectado(texto) {
 
       if (procesando) {
@@ -530,6 +517,8 @@
 
 
       try {
+
+        // Primero comprobamos que exista
 
         const busqueda =
           await api(
@@ -557,6 +546,8 @@
           busqueda.entrada;
 
 
+        // Comprobamos si ya fue utilizada
+
         if (
           String(entrada.estado)
             .trim()
@@ -575,6 +566,8 @@
         }
 
 
+        // Registramos el ingreso
+
         const registro =
           await api(
             "registrar",
@@ -584,6 +577,8 @@
             }
           );
 
+
+        // Registro correcto
 
         if (
           registro.exito &&
@@ -614,6 +609,8 @@
 
         }
 
+
+        // Otro dispositivo lo registró antes
 
         if (
           registro.tipo ===
@@ -652,6 +649,10 @@
 
     }
 
+
+    // =====================================================
+    // MOSTRAR RESULTADO
+    // =====================================================
 
     function mostrarResultado(
       correcto,
@@ -698,6 +699,10 @@
     }
 
 
+    // =====================================================
+    // CERRAR RESULTADO
+    // =====================================================
+
     function cerrarResultado() {
 
       document
@@ -709,6 +714,10 @@
 
     }
 
+
+    // =====================================================
+    // BUSCAR PERSONAS
+    // =====================================================
 
     async function buscarPersonas() {
 
@@ -842,6 +851,10 @@
     }
 
 
+    // =====================================================
+    // DESHACER INGRESO
+    // =====================================================
+
     async function deshacer(id) {
 
       const confirmar =
@@ -901,10 +914,13 @@
     }
 
 
+    // =====================================================
+    // INICIAR
+    // =====================================================
+
     actualizarContador();
 
   </script>
-
 
 </body>
 
