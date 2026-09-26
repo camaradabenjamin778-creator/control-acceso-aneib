@@ -1,1 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Control de Acceso ANEIB</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #lectorQR {
+      width: 100%;
+      max-width: 500px;
+      margin: 30px auto;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Control de Acceso ANEIB</h1>
+
+  <p>Escanea un código QR para probar la cámara.</p>
+
+  <div id="lectorQR"></div>
+
+  <div id="resultado">
+    Esperando QR...
+  </div>
+
+
+  <script>
+
+    function qrDetectado(texto) {
+
+      document.getElementById("resultado").textContent =
+        "QR detectado: " + texto;
+
+      console.log("QR:", texto);
+
+    }
+
+
+    const scanner = new Html5Qrcode("lectorQR");
+
+
+    scanner.start(
+      {
+        facingMode: "environment"
+      },
+      {
+        fps: 10,
+        qrbox: {
+          width: 250,
+          height: 250
+        }
+      },
+      qrDetectado,
+      function(error) {
+        // Ignoramos errores de lectura mientras busca el QR
+      }
+    )
+    .catch(function(error) {
+
+      document.getElementById("resultado").textContent =
+        "No se pudo acceder a la cámara: " + error;
+
+      console.error(error);
+
+    });
+
+  </script>
+
+</body>
+</html>
