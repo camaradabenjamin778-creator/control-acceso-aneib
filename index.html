@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,10 +6,7 @@
 
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Control de Acceso ANEIB</title>
 
@@ -30,13 +28,18 @@
     header {
       background: #111;
       color: white;
-      padding: 20px;
+      padding: 18px 20px;
       text-align: center;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 28px;
+    header img {
+      display: block;
+      max-width: 220px;
+      max-height: 80px;
+      width: auto;
+      height: auto;
+      margin: 0 auto;
+      object-fit: contain;
     }
 
     .contenedor {
@@ -207,7 +210,12 @@
 <body>
 
   <header>
-    <h1>Control de Acceso ANEIB</h1>
+
+    <img
+      src="LOGO.png"
+      alt="Logo ANEIB"
+    >
+
   </header>
 
 
@@ -321,10 +329,6 @@
 
   <script>
 
-    // =====================================================
-    // URL DE TU GOOGLE APPS SCRIPT
-    // =====================================================
-
     const API_URL =
       "https://script.google.com/macros/s/AKfycbzg1JIAmrhQLwXWDEAuioTNv0zSJz3TMWrc-fQDXRF16nhkCJ7BZCg4Mw6G6wOV3oRUZw/exec";
 
@@ -336,10 +340,6 @@
     let procesando = false;
 
 
-    // =====================================================
-    // CONEXIÓN CON APPS SCRIPT
-    // =====================================================
-
     async function api(accion, parametros = {}) {
 
       let url =
@@ -348,9 +348,7 @@
         encodeURIComponent(accion);
 
 
-      for (
-        const clave in parametros
-      ) {
+      for (const clave in parametros) {
 
         url +=
           "&" +
@@ -369,10 +367,6 @@
     }
 
 
-    // =====================================================
-    // CONTADOR
-    // =====================================================
-
     async function actualizarContador() {
 
       try {
@@ -384,26 +378,18 @@
 
           document.getElementById(
             "contador"
-          ).textContent =
-            datos.contador;
+          ).textContent = datos.contador;
 
         }
 
       } catch (error) {
 
-        console.error(
-          "Error actualizando contador:",
-          error
-        );
+        console.error(error);
 
       }
 
     }
 
-
-    // =====================================================
-    // ABRIR ESCÁNER
-    // =====================================================
 
     function abrirScanner() {
 
@@ -462,10 +448,6 @@
     }
 
 
-    // =====================================================
-    // CERRAR ESCÁNER
-    // =====================================================
-
     async function cerrarScanner() {
 
       if (
@@ -500,10 +482,6 @@
     }
 
 
-    // =====================================================
-    // QR DETECTADO
-    // =====================================================
-
     async function qrDetectado(texto) {
 
       if (procesando) {
@@ -517,8 +495,6 @@
 
 
       try {
-
-        // Primero comprobamos que exista
 
         const busqueda =
           await api(
@@ -546,8 +522,6 @@
           busqueda.entrada;
 
 
-        // Comprobamos si ya fue utilizada
-
         if (
           String(entrada.estado)
             .trim()
@@ -566,8 +540,6 @@
         }
 
 
-        // Registramos el ingreso
-
         const registro =
           await api(
             "registrar",
@@ -577,8 +549,6 @@
             }
           );
 
-
-        // Registro correcto
 
         if (
           registro.exito &&
@@ -609,8 +579,6 @@
 
         }
 
-
-        // Otro dispositivo lo registró antes
 
         if (
           registro.tipo ===
@@ -649,10 +617,6 @@
 
     }
 
-
-    // =====================================================
-    // MOSTRAR RESULTADO
-    // =====================================================
 
     function mostrarResultado(
       correcto,
@@ -699,10 +663,6 @@
     }
 
 
-    // =====================================================
-    // CERRAR RESULTADO
-    // =====================================================
-
     function cerrarResultado() {
 
       document
@@ -714,10 +674,6 @@
 
     }
 
-
-    // =====================================================
-    // BUSCAR PERSONAS
-    // =====================================================
 
     async function buscarPersonas() {
 
@@ -770,8 +726,8 @@
         }
 
 
-        datos.resultados
-          .forEach(function(persona) {
+        datos.resultados.forEach(
+          function(persona) {
 
             const div =
               document.createElement("div");
@@ -836,8 +792,8 @@
 
             contenedor.appendChild(div);
 
-          });
-
+          }
+        );
 
       } catch (error) {
 
@@ -850,10 +806,6 @@
 
     }
 
-
-    // =====================================================
-    // DESHACER INGRESO
-    // =====================================================
 
     async function deshacer(id) {
 
@@ -900,7 +852,6 @@
 
         }
 
-
       } catch (error) {
 
         console.error(error);
@@ -913,10 +864,6 @@
 
     }
 
-
-    // =====================================================
-    // INICIAR
-    // =====================================================
 
     actualizarContador();
 
