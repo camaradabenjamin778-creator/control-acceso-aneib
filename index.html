@@ -24,9 +24,30 @@
 
     #resultado {
       margin-top: 20px;
-      font-size: 24px;
+      padding: 30px;
+      font-size: 28px;
       font-weight: bold;
+      border-radius: 15px;
       word-break: break-word;
+    }
+
+    .esperando {
+      background: #eee;
+    }
+
+    .verde {
+      background: #28a745;
+      color: white;
+    }
+
+    .rojo {
+      background: #dc3545;
+      color: white;
+    }
+
+    #contador {
+      font-size: 22px;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -35,23 +56,65 @@
 
   <h1>Control de Acceso ANEIB</h1>
 
-  <p>Escanea un código QR.</p>
+  <div id="contador">
+    Ingresos: 0
+  </div>
 
   <div id="lectorQR"></div>
 
-  <div id="resultado">
+  <div id="resultado" class="esperando">
     Esperando QR...
   </div>
 
 
   <script>
 
-    // URL ACTUAL DE NUESTRO BACKEND
     const API_URL =
       "https://script.google.com/macros/s/AKfycbz9ReIHszmHMsyjp1CkG98saWZ8tw6NqNsvsVY2gxaEXnJHbBNi9YTBX9dIW4zY7MvdjQ/exec";
 
 
     let procesando = false;
+
+
+    function mostrarResultado(tipo, mensaje) {
+
+      const resultado =
+        document.getElementById("resultado");
+
+      resultado.className = tipo;
+
+      resultado.textContent = mensaje;
+
+    }
+
+
+    async function actualizarContador() {
+
+      try {
+
+        const respuesta = await fetch(
+          API_URL + "?accion=contador"
+        );
+
+        const datos = await respuesta.json();
+
+        if (datos.exito) {
+
+          document.getElementById("contador").textContent =
+            "Ingresos: " + datos.contador;
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Error obteniendo contador:",
+          error
+        );
+
+      }
+
+    }
 
 
     async function procesarQR(id) {
@@ -62,64 +125,138 @@
 
       procesando = true;
 
-      const resultado = document.getElementById("resultado");
-
-      resultado.textContent = "Comprobando entrada...";
-
 
       try {
 
-        const url =
+        mostrarResultado(
+          "esperando",
+          "Comprobando entrada..."
+        );
+
+
+        // Primero buscamos la entrada
+        const respuestaBusqueda = await fetch(
           API_URL +
           "?accion=buscar&id=" +
-          encodeURIComponent(id);
+          encodeURIComponent(id)
+        );
 
 
-        const respuesta = await fetch(url);
+        const datosBusqueda =
+          await respuestaBusqueda.json();
 
-        const datos = await respuesta.json();
 
+        // ID inexistente
+        if (!datosBusqueda.encontrada) {
 
-        if (!datos.encontrada) {
-
-          resultado.textContent =
-            "❌ ENTRADA NO VÁLIDA";
+          mostrarResultado(
+            "rojo",
+            "❌ ENTRADA NO VÁLIDA"
+          );
 
           return;
         }
 
 
+        const entrada =
+          datosBusqueda.entrada;
+
+
+        // Ya utilizada
         if (
-          String(datos.entrada.estado)
+          String(entrada.estado)
             .trim()
             .toUpperCase() === "INGRESADO"
         ) {
 
-          resultado.textContent =
-            "❌ ENTRADA YA UTILIZADA";
+          mostrarResultado(
+            "rojo",
+            "❌ ENTRADA YA UTILIZADA\n" +
+            entrada.nombre
+          );
 
           return;
         }
 
 
-        // Si existe y está pendiente
-        resultado.textContent =
-          "✅ ENTRADA VÁLIDA — " +
-          datos.entrada.nombre;
+        // Registrar ingreso
+        const respuestaRegistro = await fetch(
+          API_URL +
+          "?accion=registrar&id=" +
+          encodeURIComponent(id) +
+          "&usuario=WEB"
+        );
+
+
+        const datosRegistro =
+          await respuestaRegistro.json();
+
+
+        // Registro correcto
+        if (
+          datosRegistro.exito &&
+          datosRegistro.tipo === "INGRESADO"
+        ) {
+
+          mostrarResultado(
+            "verde",
+            "✓ INGRESO REGISTRADO\n" +
+            entrada.nombre
+          );
+
+
+          // Actualizar contador
+          await actualizarContador();
+
+
+          return;
+        }
+
+
+        // Por seguridad, manejar carrera entre dispositivos
+        if (
+          datosRegistro.tipo === "YA_INGRESADO"
+        ) {
+
+          mostrarResultado(
+            "rojo",
+            "❌ ENTRADA YA UTILIZADA\n" +
+            entrada.nombre
+          );
+
+          return;
+        }
+
+
+        mostrarResultado(
+          "rojo",
+          "❌ NO SE PUDO REGISTRAR"
+        );
 
 
       } catch (error) {
 
         console.error(error);
 
-        resultado.textContent =
-          "Error al comunicarse con el servidor.";
+        mostrarResultado(
+          "rojo",
+          "❌ ERROR DE CONEXIÓN"
+        );
+
 
       } finally {
 
+        // Esperar antes de permitir otro escaneo
         setTimeout(function() {
+
           procesando = false;
-        }, 2000);
+
+          mostrarResultado(
+            "esperando",
+            "Esperando QR..."
+          );
+
+        }, 3000);
 
       }
 
@@ -128,7 +265,10 @@
 
     function qrDetectado(texto) {
 
-      console.log("QR detectado:", texto);
+      console.log(
+        "QR detectado:",
+        texto
+      );
 
       procesarQR(texto);
 
@@ -145,24 +285,34 @@
       },
       {
         fps: 10,
+
         qrbox: {
           width: 250,
           height: 250
         }
       },
+
       qrDetectado,
+
       function(error) {
-        // Ignorar errores normales de lectura
+        // Errores normales mientras busca QR
       }
+
     )
     .catch(function(error) {
 
-      document.getElementById("resultado").textContent =
-        "No se pudo acceder a la cámara.";
+      mostrarResultado(
+        "rojo",
+        "❌ NO SE PUDO ACCEDER A LA CÁMARA"
+      );
 
       console.error(error);
 
     });
+
+
+    // Cargar contador al abrir
+    actualizarContador();
 
   </script>
 
