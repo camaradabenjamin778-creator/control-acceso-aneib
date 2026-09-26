@@ -1,89 +1,401 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Control de Acceso ANEIB</title>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 30px;
+
+    * {
+      box-sizing: border-box;
     }
+
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f5f7;
+      color: #111;
+    }
+
+
+    header {
+      background: #111;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+
+    .contenedor {
+      width: 100%;
+      max-width: 900px;
+      margin: auto;
+      padding: 25px;
+    }
+
+
+    .contador {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+
+    .contadorNumero {
+      font-size: 55px;
+      font-weight: bold;
+    }
+
+
+    .contadorTexto {
+      font-size: 18px;
+      color: #666;
+    }
+
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 15px 20px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+
+    .botonEscanear {
+      width: 100%;
+      background: #111;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+
+    .botonCerrar {
+      width: 100%;
+      background: #ddd;
+      margin-top: 15px;
+    }
+
+
+    .panel {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+
+    .panel h2 {
+      margin-top: 0;
+    }
+
 
     #lectorQR {
       width: 100%;
       max-width: 500px;
-      margin: 30px auto;
+      margin: auto;
     }
+
 
     #resultado {
-      margin-top: 20px;
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+
+      align-items: center;
+      justify-content: center;
+
+      flex-direction: column;
+
+      text-align: center;
       padding: 30px;
-      font-size: 28px;
+    }
+
+
+    #resultado.verde {
+      display: flex;
+      background: #20a957;
+      color: white;
+    }
+
+
+    #resultado.rojo {
+      display: flex;
+      background: #d62828;
+      color: white;
+    }
+
+
+    #resultado .icono {
+      font-size: 90px;
+      margin-bottom: 20px;
+    }
+
+
+    #resultado .mensaje {
+      font-size: 35px;
       font-weight: bold;
-      border-radius: 15px;
-      word-break: break-word;
+      white-space: pre-line;
     }
 
-    .esperando {
-      background: #eee;
+
+    #resultado button {
+      margin-top: 35px;
+      background: white;
+      color: #111;
     }
 
-    .verde {
-      background: #28a745;
-      color: white;
+
+    #busqueda {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 17px;
+      margin-bottom: 15px;
     }
 
-    .rojo {
-      background: #dc3545;
-      color: white;
+
+    .persona {
+      border-top: 1px solid #ddd;
+      padding: 15px 0;
     }
 
-    #contador {
-      font-size: 22px;
-      margin-top: 20px;
+
+    .personaNombre {
+      font-weight: bold;
+      font-size: 19px;
     }
+
+
+    .personaDatos {
+      color: #666;
+      margin: 5px 0;
+    }
+
+
+    .estado {
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+
+    .estado.ingresado {
+      color: #159447;
+    }
+
+
+    .estado.pendiente {
+      color: #d28b00;
+    }
+
+
+    .botonDeshacer {
+      background: #ddd;
+      font-size: 14px;
+      padding: 10px 15px;
+    }
+
+
+    .ultimo {
+      background: #f0f0f0;
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+
+    .oculto {
+      display: none;
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
-  <h1>Control de Acceso ANEIB</h1>
 
-  <div id="contador">
-    Ingresos: 0
+  <header>
+
+    <h1>Control de Acceso ANEIB</h1>
+
+  </header>
+
+
+  <div class="contenedor">
+
+
+    <div class="contador">
+
+      <div
+        id="contador"
+        class="contadorNumero"
+      >
+        0
+      </div>
+
+      <div class="contadorTexto">
+        personas ingresadas
+      </div>
+
+    </div>
+
+
+    <button
+      class="botonEscanear"
+      onclick="abrirScanner()"
+    >
+      ESCANEAR QR
+    </button>
+
+
+    <div class="panel">
+
+      <h2>Último ingreso</h2>
+
+      <div
+        id="ultimoIngreso"
+        class="ultimo"
+      >
+        Todavía no hay ingresos registrados.
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <h2>Buscar persona</h2>
+
+      <input
+        id="busqueda"
+        type="text"
+        placeholder="Nombre, correo o ID..."
+        oninput="buscarPersonas()"
+      >
+
+      <div id="resultados"></div>
+
+    </div>
+
+
   </div>
 
-  <div id="lectorQR"></div>
 
-  <div id="resultado" class="esperando">
-    Esperando QR...
+  <!-- SCANNER -->
+
+  <div
+    id="panelScanner"
+    class="oculto"
+    style="
+      position:fixed;
+      inset:0;
+      z-index:900;
+      background:white;
+      padding:20px;
+      overflow:auto;
+    "
+  >
+
+    <h2>Escanear QR</h2>
+
+    <div id="lectorQR"></div>
+
+    <button
+      class="botonCerrar"
+      onclick="cerrarScanner()"
+    >
+      CERRAR ESCÁNER
+    </button>
+
+  </div>
+
+
+  <!-- RESULTADO -->
+
+  <div id="resultado">
+
+    <div
+      id="resultadoIcono"
+      class="icono"
+    ></div>
+
+    <div
+      id="resultadoMensaje"
+      class="mensaje"
+    ></div>
+
+    <button onclick="cerrarResultado()">
+      CONTINUAR
+    </button>
+
   </div>
 
 
   <script>
 
+
     const API_URL =
       "https://script.google.com/macros/s/AKfycbz9ReIHszmHMsyjp1CkG98saWZ8tw6NqNsvsVY2gxaEXnJHbBNi9YTBX9dIW4zY7MvdjQ/exec";
 
 
+    let scanner = null;
+
+    let scannerActivo = false;
+
     let procesando = false;
 
 
-    function mostrarResultado(tipo, mensaje) {
+    async function api(accion, parametros = {}) {
 
-      const resultado =
-        document.getElementById("resultado");
+      let url =
+        API_URL +
+        "?accion=" +
+        encodeURIComponent(accion);
 
-      resultado.className = tipo;
 
-      resultado.textContent = mensaje;
+      for (
+        const clave in parametros
+      ) {
+
+        url +=
+          "&" +
+          encodeURIComponent(clave) +
+          "=" +
+          encodeURIComponent(parametros[clave]);
+
+      }
+
+
+      const respuesta =
+        await fetch(url);
+
+      return await respuesta.json();
 
     }
 
@@ -92,32 +404,119 @@
 
       try {
 
-        const respuesta = await fetch(
-          API_URL + "?accion=contador"
-        );
-
-        const datos = await respuesta.json();
+        const datos =
+          await api("contador");
 
         if (datos.exito) {
 
-          document.getElementById("contador").textContent =
-            "Ingresos: " + datos.contador;
+          document.getElementById(
+            "contador"
+          ).textContent =
+            datos.contador;
 
         }
 
       } catch (error) {
 
-        console.error(
-          "Error obteniendo contador:",
-          error
-        );
+        console.error(error);
 
       }
 
     }
 
 
-    async function procesarQR(id) {
+    function abrirScanner() {
+
+      document
+        .getElementById("panelScanner")
+        .classList.remove("oculto");
+
+
+      if (scannerActivo) {
+        return;
+      }
+
+
+      scanner =
+        new Html5Qrcode("lectorQR");
+
+
+      scanner.start(
+
+        {
+          facingMode: "environment"
+        },
+
+        {
+          fps: 10,
+
+          qrbox: {
+            width: 250,
+            height: 250
+          }
+
+        },
+
+        qrDetectado,
+
+        function(error) {}
+
+      )
+      .then(function() {
+
+        scannerActivo = true;
+
+      })
+      .catch(function(error) {
+
+        alert(
+          "No se pudo acceder a la cámara."
+        );
+
+        console.error(error);
+
+        cerrarScanner();
+
+      });
+
+    }
+
+
+    async function cerrarScanner() {
+
+      if (
+        scanner &&
+        scannerActivo
+      ) {
+
+        try {
+
+          await scanner.stop();
+
+          await scanner.clear();
+
+        } catch (error) {
+
+          console.error(error);
+
+        }
+
+      }
+
+
+      scannerActivo = false;
+
+      scanner = null;
+
+
+      document
+        .getElementById("panelScanner")
+        .classList.add("oculto");
+
+    }
+
+
+    async function qrDetectado(texto) {
 
       if (procesando) {
         return;
@@ -126,111 +525,115 @@
       procesando = true;
 
 
+      await cerrarScanner();
+
+
       try {
 
-        mostrarResultado(
-          "esperando",
-          "Comprobando entrada..."
-        );
+        const busqueda =
+          await api(
+            "buscar",
+            {
+              id: texto
+            }
+          );
 
 
-        // Primero buscamos la entrada
-        const respuestaBusqueda = await fetch(
-          API_URL +
-          "?accion=buscar&id=" +
-          encodeURIComponent(id)
-        );
-
-
-        const datosBusqueda =
-          await respuestaBusqueda.json();
-
-
-        // ID inexistente
-        if (!datosBusqueda.encontrada) {
+        if (!busqueda.encontrada) {
 
           mostrarResultado(
-            "rojo",
-            "❌ ENTRADA NO VÁLIDA"
+            false,
+            "ENTRADA NO VÁLIDA",
+            ""
           );
 
           return;
+
         }
 
 
         const entrada =
-          datosBusqueda.entrada;
+          busqueda.entrada;
 
 
-        // Ya utilizada
         if (
           String(entrada.estado)
             .trim()
-            .toUpperCase() === "INGRESADO"
+            .toUpperCase() ===
+          "INGRESADO"
         ) {
 
           mostrarResultado(
-            "rojo",
-            "❌ ENTRADA YA UTILIZADA\n" +
+            false,
+            "ENTRADA YA UTILIZADA",
             entrada.nombre
           );
 
           return;
+
         }
 
 
-        // Registrar ingreso
-        const respuestaRegistro = await fetch(
-          API_URL +
-          "?accion=registrar&id=" +
-          encodeURIComponent(id) +
-          "&usuario=WEB"
-        );
+        const registro =
+          await api(
+            "registrar",
+            {
+              id: texto,
+              usuario: "WEB"
+            }
+          );
 
 
-        const datosRegistro =
-          await respuestaRegistro.json();
-
-
-        // Registro correcto
         if (
-          datosRegistro.exito &&
-          datosRegistro.tipo === "INGRESADO"
+          registro.exito &&
+          registro.tipo ===
+          "INGRESADO"
         ) {
 
           mostrarResultado(
-            "verde",
-            "✓ INGRESO REGISTRADO\n" +
+            true,
+            "INGRESO REGISTRADO",
             entrada.nombre
           );
 
 
-          // Actualizar contador
-          await actualizarContador();
+          document.getElementById(
+            "ultimoIngreso"
+          ).innerHTML =
+            "<strong>" +
+            entrada.nombre +
+            "</strong><br>" +
+            "ID: " +
+            entrada.id;
 
+
+          actualizarContador();
 
           return;
+
         }
 
 
-        // Por seguridad, manejar carrera entre dispositivos
         if (
-          datosRegistro.tipo === "YA_INGRESADO"
+          registro.tipo ===
+          "YA_INGRESADO"
         ) {
 
           mostrarResultado(
-            "rojo",
-            "❌ ENTRADA YA UTILIZADA\n" +
+            false,
+            "ENTRADA YA UTILIZADA",
             entrada.nombre
           );
 
           return;
+
         }
 
 
         mostrarResultado(
-          "rojo",
-          "❌ NO SE PUDO REGISTRAR"
+          false,
+          "NO SE PUDO REGISTRAR",
+          ""
         );
 
 
@@ -239,82 +642,269 @@
         console.error(error);
 
         mostrarResultado(
-          "rojo",
-          "❌ ERROR DE CONEXIÓN"
+          false,
+          "ERROR DE CONEXIÓN",
+          ""
+        );
+
+      }
+
+    }
+
+
+    function mostrarResultado(
+      correcto,
+      titulo,
+      nombre
+    ) {
+
+      const resultado =
+        document.getElementById(
+          "resultado"
+        );
+
+      const icono =
+        document.getElementById(
+          "resultadoIcono"
+        );
+
+      const mensaje =
+        document.getElementById(
+          "resultadoMensaje"
         );
 
 
-      } finally {
+      resultado.className =
+        correcto
+          ? "verde"
+          : "rojo";
 
-        // Esperar antes de permitir otro escaneo
-        setTimeout(function() {
 
-          procesando = false;
+      icono.textContent =
+        correcto
+          ? "✓"
+          : "✕";
 
-          mostrarResultado(
-            "esperando",
-            "Esperando QR..."
+
+      mensaje.textContent =
+        titulo +
+        (
+          nombre
+            ? "\n\n" + nombre
+            : ""
+        );
+
+    }
+
+
+    function cerrarResultado() {
+
+      document
+        .getElementById("resultado")
+        .className = "";
+
+
+      procesando = false;
+
+    }
+
+
+    async function buscarPersonas() {
+
+      const termino =
+        document
+          .getElementById("busqueda")
+          .value
+          .trim();
+
+
+      const contenedor =
+        document.getElementById(
+          "resultados"
+        );
+
+
+      if (!termino) {
+
+        contenedor.innerHTML = "";
+
+        return;
+
+      }
+
+
+      try {
+
+        const datos =
+          await api(
+            "personas",
+            {
+              termino: termino
+            }
           );
 
-        }, 3000);
 
-      }
-
-    }
+        contenedor.innerHTML = "";
 
 
-    function qrDetectado(texto) {
+        if (
+          !datos.resultados ||
+          datos.resultados.length === 0
+        ) {
 
-      console.log(
-        "QR detectado:",
-        texto
-      );
+          contenedor.innerHTML =
+            "<p>No se encontraron personas.</p>";
 
-      procesarQR(texto);
+          return;
 
-    }
-
-
-    const scanner =
-      new Html5Qrcode("lectorQR");
-
-
-    scanner.start(
-      {
-        facingMode: "environment"
-      },
-      {
-        fps: 10,
-
-        qrbox: {
-          width: 250,
-          height: 250
         }
-      },
 
-      qrDetectado,
 
-      function(error) {
-        // Errores normales mientras busca QR
+        datos.resultados
+          .forEach(function(persona) {
+
+            const div =
+              document.createElement("div");
+
+            div.className =
+              "persona";
+
+
+            const estado =
+              String(persona.estado)
+                .trim()
+                .toUpperCase();
+
+
+            const estaIngresado =
+              estado === "INGRESADO";
+
+
+            div.innerHTML = `
+
+              <div class="personaNombre">
+                ${persona.nombre}
+              </div>
+
+              <div class="personaDatos">
+                ${persona.email}
+              </div>
+
+              <div class="personaDatos">
+                ID: ${persona.id}
+              </div>
+
+              <div class="estado ${
+                estaIngresado
+                  ? "ingresado"
+                  : "pendiente"
+              }">
+
+                ${
+                  estaIngresado
+                    ? "INGRESADO"
+                    : "PENDIENTE"
+                }
+
+              </div>
+
+              ${
+                estaIngresado
+                  ? `
+                    <button
+                      class="botonDeshacer"
+                      onclick="deshacer('${persona.id}')"
+                    >
+                      DESHACER INGRESO
+                    </button>
+                  `
+                  : ""
+              }
+
+            `;
+
+
+            contenedor.appendChild(div);
+
+          });
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        contenedor.innerHTML =
+          "<p>Error al buscar.</p>";
+
       }
 
-    )
-    .catch(function(error) {
-
-      mostrarResultado(
-        "rojo",
-        "❌ NO SE PUDO ACCEDER A LA CÁMARA"
-      );
-
-      console.error(error);
-
-    });
+    }
 
 
-    // Cargar contador al abrir
+    async function deshacer(id) {
+
+      const confirmar =
+        confirm(
+          "¿Seguro que quieres deshacer el ingreso de esta persona?"
+        );
+
+
+      if (!confirmar) {
+        return;
+      }
+
+
+      try {
+
+        const datos =
+          await api(
+            "deshacer",
+            {
+              id: id,
+              usuario: "WEB"
+            }
+          );
+
+
+        if (datos.exito) {
+
+          alert(
+            "Ingreso deshecho correctamente."
+          );
+
+
+          await actualizarContador();
+
+          await buscarPersonas();
+
+        } else {
+
+          alert(
+            datos.mensaje ||
+            "No se pudo deshacer."
+          );
+
+        }
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Error de conexión."
+        );
+
+      }
+
+    }
+
+
     actualizarContador();
 
   </script>
 
+
 </body>
+
 </html>
