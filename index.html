@@ -1,873 +1,968 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Control de Acceso ANEIB</title>
+<title>Control de Acceso ANEIB</title>
 
-  <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
-  <style>
+<style>
 
-    * {
-      box-sizing: border-box;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f5f7;
-      color: #111;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f5f7;
+  color: #111;
+}
 
-    header {
-      background: #111;
-      color: white;
-      padding: 18px 20px;
-      text-align: center;
-    }
+/* LOGO */
 
-    header img {
-      display: block;
-      max-width: 220px;
-      max-height: 80px;
-      width: auto;
-      height: auto;
-      margin: 0 auto;
-      object-fit: contain;
-    }
+header {
+  background: #111;
+  padding: 0;
+  text-align: center;
+}
 
-    .contenedor {
-      width: 100%;
-      max-width: 900px;
-      margin: auto;
-      padding: 25px;
-    }
+header img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  object-fit: contain;
+}
 
-    .contador {
-      background: white;
-      border-radius: 15px;
-      padding: 25px;
-      text-align: center;
-      margin-bottom: 20px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-    }
 
-    .contadorNumero {
-      font-size: 55px;
-      font-weight: bold;
-    }
+/* CONTENEDOR */
 
-    .contadorTexto {
-      font-size: 18px;
-      color: #666;
-    }
+.contenedor {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+  padding: 25px;
+}
 
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 15px 20px;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
 
-    .botonEscanear {
-      width: 100%;
-      background: #111;
-      color: white;
-      margin-bottom: 20px;
-    }
+/* CONTADOR */
 
-    .botonCerrar {
-      width: 100%;
-      background: #ddd;
-      margin-top: 15px;
-    }
+.contador {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
 
-    .panel {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-    }
+.contadorNumero {
+  font-size: 55px;
+  font-weight: bold;
+}
 
-    .panel h2 {
-      margin-top: 0;
-    }
+.contadorTexto {
+  font-size: 18px;
+  color: #666;
+}
 
-    #lectorQR {
-      width: 100%;
-      max-width: 500px;
-      margin: auto;
-    }
 
-    #resultado {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-      padding: 30px;
-    }
+/* BOTONES */
 
-    #resultado.verde {
-      display: flex;
-      background: #20a957;
-      color: white;
-    }
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 15px 20px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    #resultado.rojo {
-      display: flex;
-      background: #d62828;
-      color: white;
-    }
+.botonEscanear {
+  width: 100%;
+  background: #111;
+  color: white;
+  margin-bottom: 20px;
+}
 
-    #resultado .icono {
-      font-size: 90px;
-      margin-bottom: 20px;
-    }
+.botonCerrar {
+  width: 100%;
+  background: #ddd;
+  margin-top: 15px;
+}
 
-    #resultado .mensaje {
-      font-size: 35px;
-      font-weight: bold;
-      white-space: pre-line;
-    }
 
-    #resultado button {
-      margin-top: 35px;
-      background: white;
-      color: #111;
-    }
+/* PANELES */
 
-    #busqueda {
-      width: 100%;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 17px;
-      margin-bottom: 15px;
-    }
+.panel {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
 
-    .persona {
-      border-top: 1px solid #ddd;
-      padding: 15px 0;
-    }
+.panel h2 {
+  margin-top: 0;
+}
 
-    .personaNombre {
-      font-weight: bold;
-      font-size: 19px;
-    }
 
-    .personaDatos {
-      color: #666;
-      margin: 5px 0;
-    }
+/* SCANNER */
 
-    .estado {
-      font-weight: bold;
-      margin: 10px 0;
-    }
+#lectorQR {
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
 
-    .estado.ingresado {
-      color: #159447;
-    }
 
-    .estado.pendiente {
-      color: #d28b00;
-    }
+/* RESULTADO */
 
-    .botonDeshacer {
-      background: #ddd;
-      font-size: 14px;
-      padding: 10px 15px;
-    }
+#resultado {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 30px;
+}
 
-    .ultimo {
-      background: #f0f0f0;
-      border-radius: 10px;
-      padding: 15px;
-    }
+#resultado.verde {
+  display: flex;
+  background: #20a957;
+  color: white;
+}
 
-    .oculto {
-      display: none;
-    }
+#resultado.rojo {
+  display: flex;
+  background: #d62828;
+  color: white;
+}
 
-  </style>
+#resultado .icono {
+  font-size: 90px;
+  margin-bottom: 20px;
+}
+
+#resultado .mensaje {
+  font-size: 35px;
+  font-weight: bold;
+  white-space: pre-line;
+}
+
+#resultado button {
+  margin-top: 35px;
+  background: white;
+  color: #111;
+}
+
+
+/* BUSCADOR */
+
+#busqueda {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 17px;
+  margin-bottom: 15px;
+}
+
+.persona {
+  border-top: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.personaNombre {
+  font-weight: bold;
+  font-size: 19px;
+}
+
+.personaDatos {
+  color: #666;
+  margin: 5px 0;
+}
+
+.estado {
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.estado.ingresado {
+  color: #159447;
+}
+
+.estado.pendiente {
+  color: #d28b00;
+}
+
+.botonDeshacer {
+  background: #ddd;
+  font-size: 14px;
+  padding: 10px 15px;
+}
+
+
+/* ÚLTIMO INGRESO */
+
+.ultimo {
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+
+/* OCULTO */
+
+.oculto {
+  display: none;
+}
+
+</style>
 
 </head>
 
 
 <body>
 
-  <header>
 
-    <img
-      src="LOGO.png"
-      alt="Logo ANEIB"
-    >
+<!-- LOGO -->
 
-  </header>
+<header>
 
-
-  <div class="contenedor">
-
-    <div class="contador">
-
-      <div
-        id="contador"
-        class="contadorNumero"
-      >
-        0
-      </div>
-
-      <div class="contadorTexto">
-        personas ingresadas
-      </div>
-
-    </div>
-
-
-    <button
-      class="botonEscanear"
-      onclick="abrirScanner()"
-    >
-      ESCANEAR QR
-    </button>
-
-
-    <div class="panel">
-
-      <h2>Último ingreso</h2>
-
-      <div
-        id="ultimoIngreso"
-        class="ultimo"
-      >
-        Todavía no hay ingresos registrados.
-      </div>
-
-    </div>
-
-
-    <div class="panel">
-
-      <h2>Buscar persona</h2>
-
-      <input
-        id="busqueda"
-        type="text"
-        placeholder="Nombre, correo o ID..."
-        oninput="buscarPersonas()"
-      >
-
-      <div id="resultados"></div>
-
-    </div>
-
-  </div>
-
-
-  <!-- SCANNER -->
-
-  <div
-    id="panelScanner"
-    class="oculto"
-    style="
-      position:fixed;
-      inset:0;
-      z-index:900;
-      background:white;
-      padding:20px;
-      overflow:auto;
-    "
+  <img
+    src="LOGO.png"
+    alt="Logo ANEIB"
   >
 
-    <h2>Escanear QR</h2>
+</header>
 
-    <div id="lectorQR"></div>
 
-    <button
-      class="botonCerrar"
-      onclick="cerrarScanner()"
+<div class="contenedor">
+
+
+  <!-- CONTADOR -->
+
+  <div class="contador">
+
+    <div
+      id="contador"
+      class="contadorNumero"
     >
-      CERRAR ESCÁNER
-    </button>
+      0
+    </div>
+
+    <div class="contadorTexto">
+      personas ingresadas
+    </div>
 
   </div>
 
 
-  <!-- RESULTADO -->
+  <!-- ESCANEAR -->
 
-  <div id="resultado">
+  <button
+    class="botonEscanear"
+    onclick="abrirScanner()"
+  >
+    ESCANEAR QR
+  </button>
+
+
+  <!-- ÚLTIMO INGRESO -->
+
+  <div class="panel">
+
+    <h2>Último ingreso</h2>
 
     <div
-      id="resultadoIcono"
-      class="icono"
-    ></div>
-
-    <div
-      id="resultadoMensaje"
-      class="mensaje"
-    ></div>
-
-    <button onclick="cerrarResultado()">
-      CONTINUAR
-    </button>
+      id="ultimoIngreso"
+      class="ultimo"
+    >
+      Todavía no hay ingresos registrados.
+    </div>
 
   </div>
 
 
-  <script>
+  <!-- BÚSQUEDA -->
 
-    const API_URL =
-      "https://script.google.com/macros/s/AKfycbzg1JIAmrhQLwXWDEAuioTNv0zSJz3TMWrc-fQDXRF16nhkCJ7BZCg4Mw6G6wOV3oRUZw/exec";
+  <div class="panel">
 
+    <h2>Buscar persona</h2>
 
-    let scanner = null;
+    <input
+      id="busqueda"
+      type="text"
+      placeholder="Nombre, correo o ID..."
+      oninput="buscarPersonas()"
+    >
 
-    let scannerActivo = false;
+    <div id="resultados"></div>
 
-    let procesando = false;
-
-
-    async function api(accion, parametros = {}) {
-
-      let url =
-        API_URL +
-        "?accion=" +
-        encodeURIComponent(accion);
+  </div>
 
 
-      for (const clave in parametros) {
-
-        url +=
-          "&" +
-          encodeURIComponent(clave) +
-          "=" +
-          encodeURIComponent(parametros[clave]);
-
-      }
+</div>
 
 
-      const respuesta =
-        await fetch(url);
+<!-- PANEL DEL SCANNER -->
 
-      return await respuesta.json();
+<div
+  id="panelScanner"
+  class="oculto"
+  style="
+    position:fixed;
+    inset:0;
+    z-index:900;
+    background:white;
+    padding:20px;
+    overflow:auto;
+  "
+>
+
+  <h2>Escanear QR</h2>
+
+  <div id="lectorQR"></div>
+
+  <button
+    class="botonCerrar"
+    onclick="cerrarScanner()"
+  >
+    CERRAR ESCÁNER
+  </button>
+
+</div>
+
+
+<!-- RESULTADO -->
+
+<div id="resultado">
+
+  <div
+    id="resultadoIcono"
+    class="icono"
+  ></div>
+
+  <div
+    id="resultadoMensaje"
+    class="mensaje"
+  ></div>
+
+  <button onclick="cerrarResultado()">
+    CONTINUAR
+  </button>
+
+</div>
+
+
+<script>
+
+
+/* API */
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbzg1JIAmrhQLwXWDEAuioTNv0zSJz3TMWrc-fQDXRF16nhkCJ7BZCg4Mw6G6wOV3oRUZw/exec";
+
+
+let scanner = null;
+
+let scannerActivo = false;
+
+let procesando = false;
+
+
+/* COMUNICACIÓN CON APPS SCRIPT */
+
+async function api(accion, parametros = {}) {
+
+  let url =
+    API_URL +
+    "?accion=" +
+    encodeURIComponent(accion);
+
+
+  for (const clave in parametros) {
+
+    url +=
+      "&" +
+      encodeURIComponent(clave) +
+      "=" +
+      encodeURIComponent(parametros[clave]);
+
+  }
+
+
+  const respuesta =
+    await fetch(url);
+
+
+  return await respuesta.json();
+
+}
+
+
+/* CONTADOR */
+
+async function actualizarContador() {
+
+  try {
+
+    const datos =
+      await api("contador");
+
+
+    if (datos.exito) {
+
+      document.getElementById(
+        "contador"
+      ).textContent = datos.contador;
 
     }
 
+  } catch (error) {
 
-    async function actualizarContador() {
+    console.error(
+      "Error actualizando contador:",
+      error
+    );
 
-      try {
+  }
 
-        const datos =
-          await api("contador");
+}
 
-        if (datos.exito) {
 
-          document.getElementById(
-            "contador"
-          ).textContent = datos.contador;
+/* ABRIR SCANNER */
 
-        }
+function abrirScanner() {
 
-      } catch (error) {
+  document
+    .getElementById("panelScanner")
+    .classList.remove("oculto");
 
-        console.error(error);
 
+  if (scannerActivo) {
+    return;
+  }
+
+
+  scanner =
+    new Html5Qrcode("lectorQR");
+
+
+  scanner.start(
+
+    {
+      facingMode: "environment"
+    },
+
+    {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250
       }
+    },
+
+    qrDetectado,
+
+    function(error) {}
+
+  )
+  .then(function() {
+
+    scannerActivo = true;
+
+  })
+  .catch(function(error) {
+
+    alert(
+      "No se pudo acceder a la cámara."
+    );
+
+    console.error(error);
+
+    cerrarScanner();
+
+  });
+
+}
+
+
+/* CERRAR SCANNER */
+
+async function cerrarScanner() {
+
+  if (
+    scanner &&
+    scannerActivo
+  ) {
+
+    try {
+
+      await scanner.stop();
+
+      await scanner.clear();
+
+    } catch (error) {
+
+      console.error(error);
 
     }
 
-
-    function abrirScanner() {
-
-      document
-        .getElementById("panelScanner")
-        .classList.remove("oculto");
+  }
 
 
-      if (scannerActivo) {
-        return;
-      }
+  scannerActivo = false;
+
+  scanner = null;
 
 
-      scanner =
-        new Html5Qrcode("lectorQR");
+  document
+    .getElementById("panelScanner")
+    .classList.add("oculto");
+
+}
 
 
-      scanner.start(
+/* QR DETECTADO */
 
+async function qrDetectado(texto) {
+
+  if (procesando) {
+    return;
+  }
+
+
+  procesando = true;
+
+
+  await cerrarScanner();
+
+
+  try {
+
+    const busqueda =
+      await api(
+        "buscar",
         {
-          facingMode: "environment"
-        },
+          id: texto
+        }
+      );
 
-        {
-          fps: 10,
 
-          qrbox: {
-            width: 250,
-            height: 250
-          }
+    /* ID NO EXISTE */
 
-        },
+    if (!busqueda.encontrada) {
 
-        qrDetectado,
+      mostrarResultado(
+        false,
+        "ENTRADA NO VÁLIDA",
+        ""
+      );
 
-        function(error) {}
-
-      )
-      .then(function() {
-
-        scannerActivo = true;
-
-      })
-      .catch(function(error) {
-
-        alert(
-          "No se pudo acceder a la cámara."
-        );
-
-        console.error(error);
-
-        cerrarScanner();
-
-      });
+      return;
 
     }
 
 
-    async function cerrarScanner() {
-
-      if (
-        scanner &&
-        scannerActivo
-      ) {
-
-        try {
-
-          await scanner.stop();
-
-          await scanner.clear();
-
-        } catch (error) {
-
-          console.error(error);
-
-        }
-
-      }
+    const entrada =
+      busqueda.entrada;
 
 
-      scannerActivo = false;
+    /* YA FUE UTILIZADO */
 
-      scanner = null;
-
-
-      document
-        .getElementById("panelScanner")
-        .classList.add("oculto");
-
-    }
-
-
-    async function qrDetectado(texto) {
-
-      if (procesando) {
-        return;
-      }
-
-      procesando = true;
-
-
-      await cerrarScanner();
-
-
-      try {
-
-        const busqueda =
-          await api(
-            "buscar",
-            {
-              id: texto
-            }
-          );
-
-
-        if (!busqueda.encontrada) {
-
-          mostrarResultado(
-            false,
-            "ENTRADA NO VÁLIDA",
-            ""
-          );
-
-          return;
-
-        }
-
-
-        const entrada =
-          busqueda.entrada;
-
-
-        if (
-          String(entrada.estado)
-            .trim()
-            .toUpperCase() ===
-          "INGRESADO"
-        ) {
-
-          mostrarResultado(
-            false,
-            "ENTRADA YA UTILIZADA",
-            entrada.nombre
-          );
-
-          return;
-
-        }
-
-
-        const registro =
-          await api(
-            "registrar",
-            {
-              id: texto,
-              usuario: "WEB"
-            }
-          );
-
-
-        if (
-          registro.exito &&
-          registro.tipo ===
-          "INGRESADO"
-        ) {
-
-          mostrarResultado(
-            true,
-            "INGRESO REGISTRADO",
-            entrada.nombre
-          );
-
-
-          document.getElementById(
-            "ultimoIngreso"
-          ).innerHTML =
-            "<strong>" +
-            entrada.nombre +
-            "</strong><br>" +
-            "ID: " +
-            entrada.id;
-
-
-          actualizarContador();
-
-          return;
-
-        }
-
-
-        if (
-          registro.tipo ===
-          "YA_INGRESADO"
-        ) {
-
-          mostrarResultado(
-            false,
-            "ENTRADA YA UTILIZADA",
-            entrada.nombre
-          );
-
-          return;
-
-        }
-
-
-        mostrarResultado(
-          false,
-          "NO SE PUDO REGISTRAR",
-          ""
-        );
-
-
-      } catch (error) {
-
-        console.error(error);
-
-        mostrarResultado(
-          false,
-          "ERROR DE CONEXIÓN",
-          ""
-        );
-
-      }
-
-    }
-
-
-    function mostrarResultado(
-      correcto,
-      titulo,
-      nombre
+    if (
+      String(entrada.estado)
+        .trim()
+        .toUpperCase() ===
+      "INGRESADO"
     ) {
 
-      const resultado =
-        document.getElementById(
-          "resultado"
-        );
+      mostrarResultado(
+        false,
+        "ENTRADA YA UTILIZADA",
+        entrada.nombre
+      );
 
-      const icono =
-        document.getElementById(
-          "resultadoIcono"
-        );
-
-      const mensaje =
-        document.getElementById(
-          "resultadoMensaje"
-        );
-
-
-      resultado.className =
-        correcto
-          ? "verde"
-          : "rojo";
-
-
-      icono.textContent =
-        correcto
-          ? "✓"
-          : "✕";
-
-
-      mensaje.textContent =
-        titulo +
-        (
-          nombre
-            ? "\n\n" + nombre
-            : ""
-        );
+      return;
 
     }
 
 
-    function cerrarResultado() {
+    /* REGISTRAR INGRESO */
 
-      document
-        .getElementById("resultado")
-        .className = "";
+    const registro =
+      await api(
+        "registrar",
+        {
+          id: texto,
+          usuario: "WEB"
+        }
+      );
 
 
-      procesando = false;
+    /* INGRESO CORRECTO */
+
+    if (
+      registro.exito &&
+      registro.tipo ===
+      "INGRESADO"
+    ) {
+
+      mostrarResultado(
+        true,
+        "INGRESO REGISTRADO",
+        entrada.nombre
+      );
+
+
+      document.getElementById(
+        "ultimoIngreso"
+      ).innerHTML =
+        "<strong>" +
+        entrada.nombre +
+        "</strong><br>" +
+        "ID: " +
+        entrada.id;
+
+
+      actualizarContador();
+
+
+      return;
 
     }
 
 
-    async function buscarPersonas() {
+    /* SE VALIDÓ SIMULTÁNEAMENTE */
 
-      const termino =
-        document
-          .getElementById("busqueda")
-          .value
-          .trim();
+    if (
+      registro.tipo ===
+      "YA_INGRESADO"
+    ) {
 
-
-      const contenedor =
-        document.getElementById(
-          "resultados"
-        );
-
-
-      if (!termino) {
-
-        contenedor.innerHTML = "";
-
-        return;
-
-      }
+      mostrarResultado(
+        false,
+        "ENTRADA YA UTILIZADA",
+        entrada.nombre
+      );
 
 
-      try {
+      return;
 
-        const datos =
-          await api(
-            "personas",
-            {
-              termino: termino
-            }
+    }
+
+
+    /* ERROR */
+
+    mostrarResultado(
+      false,
+      "NO SE PUDO REGISTRAR",
+      ""
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    mostrarResultado(
+      false,
+      "ERROR DE CONEXIÓN",
+      ""
+    );
+
+  }
+
+}
+
+
+/* MOSTRAR RESULTADO */
+
+function mostrarResultado(
+  correcto,
+  titulo,
+  nombre
+) {
+
+  const resultado =
+    document.getElementById(
+      "resultado"
+    );
+
+
+  const icono =
+    document.getElementById(
+      "resultadoIcono"
+    );
+
+
+  const mensaje =
+    document.getElementById(
+      "resultadoMensaje"
+    );
+
+
+  resultado.className =
+    correcto
+      ? "verde"
+      : "rojo";
+
+
+  icono.textContent =
+    correcto
+      ? "✓"
+      : "✕";
+
+
+  mensaje.textContent =
+    titulo +
+    (
+      nombre
+        ? "\n\n" + nombre
+        : ""
+    );
+
+}
+
+
+/* CERRAR RESULTADO */
+
+function cerrarResultado() {
+
+  document
+    .getElementById("resultado")
+    .className = "";
+
+
+  procesando = false;
+
+}
+
+
+/* BUSCAR PERSONAS */
+
+async function buscarPersonas() {
+
+  const termino =
+    document
+      .getElementById("busqueda")
+      .value
+      .trim();
+
+
+  const contenedor =
+    document.getElementById(
+      "resultados"
+    );
+
+
+  if (!termino) {
+
+    contenedor.innerHTML = "";
+
+    return;
+
+  }
+
+
+  try {
+
+    const datos =
+      await api(
+        "personas",
+        {
+          termino: termino
+        }
+      );
+
+
+    contenedor.innerHTML = "";
+
+
+    if (
+      !datos.resultados ||
+      datos.resultados.length === 0
+    ) {
+
+      contenedor.innerHTML =
+        "<p>No se encontraron personas.</p>";
+
+      return;
+
+    }
+
+
+    datos.resultados.forEach(
+      function(persona) {
+
+        const div =
+          document.createElement(
+            "div"
           );
 
 
-        contenedor.innerHTML = "";
+        div.className =
+          "persona";
 
 
-        if (
-          !datos.resultados ||
-          datos.resultados.length === 0
-        ) {
-
-          contenedor.innerHTML =
-            "<p>No se encontraron personas.</p>";
-
-          return;
-
-        }
+        const estado =
+          String(persona.estado)
+            .trim()
+            .toUpperCase();
 
 
-        datos.resultados.forEach(
-          function(persona) {
-
-            const div =
-              document.createElement("div");
-
-            div.className =
-              "persona";
+        const estaIngresado =
+          estado === "INGRESADO";
 
 
-            const estado =
-              String(persona.estado)
-                .trim()
-                .toUpperCase();
+        div.innerHTML = `
 
+          <div class="personaNombre">
+            ${persona.nombre}
+          </div>
 
-            const estaIngresado =
-              estado === "INGRESADO";
+          <div class="personaDatos">
+            ${persona.email}
+          </div>
 
+          <div class="personaDatos">
+            ID: ${persona.id}
+          </div>
 
-            div.innerHTML = `
+          <div class="estado ${
+            estaIngresado
+              ? "ingresado"
+              : "pendiente"
+          }">
 
-              <div class="personaNombre">
-                ${persona.nombre}
-              </div>
+            ${
+              estaIngresado
+                ? "INGRESADO"
+                : "PENDIENTE"
+            }
 
-              <div class="personaDatos">
-                ${persona.email}
-              </div>
+          </div>
 
-              <div class="personaDatos">
-                ID: ${persona.id}
-              </div>
-
-              <div class="estado ${
-                estaIngresado
-                  ? "ingresado"
-                  : "pendiente"
-              }">
-
-                ${
-                  estaIngresado
-                    ? "INGRESADO"
-                    : "PENDIENTE"
-                }
-
-              </div>
-
-              ${
-                estaIngresado
-                  ? `
-                    <button
-                      class="botonDeshacer"
-                      onclick="deshacer('${persona.id}')"
-                    >
-                      DESHACER INGRESO
-                    </button>
-                  `
-                  : ""
-              }
-
-            `;
-
-
-            contenedor.appendChild(div);
-
+          ${
+            estaIngresado
+              ? `
+                <button
+                  class="botonDeshacer"
+                  onclick="deshacer('${persona.id}')"
+                >
+                  DESHACER INGRESO
+                </button>
+              `
+              : ""
           }
+
+        `;
+
+
+        contenedor.appendChild(
+          div
         );
 
-      } catch (error) {
-
-        console.error(error);
-
-        contenedor.innerHTML =
-          "<p>Error al buscar.</p>";
-
       }
-
-    }
-
-
-    async function deshacer(id) {
-
-      const confirmar =
-        confirm(
-          "¿Seguro que quieres deshacer el ingreso de esta persona?"
-        );
+    );
 
 
-      if (!confirmar) {
-        return;
-      }
+  } catch (error) {
+
+    console.error(error);
 
 
-      try {
+    contenedor.innerHTML =
+      "<p>Error al buscar.</p>";
 
-        const datos =
-          await api(
-            "deshacer",
-            {
-              id: id,
-              usuario: "WEB"
-            }
-          );
+  }
+
+}
 
 
-        if (datos.exito) {
+/* DESHACER INGRESO */
 
-          alert(
-            "Ingreso deshecho correctamente."
-          );
+async function deshacer(id) {
+
+  const confirmar =
+    confirm(
+      "¿Seguro que quieres deshacer el ingreso de esta persona?"
+    );
 
 
-          await actualizarContador();
+  if (!confirmar) {
+    return;
+  }
 
-          await buscarPersonas();
 
-        } else {
+  try {
 
-          alert(
-            datos.mensaje ||
-            "No se pudo deshacer."
-          );
-
+    const datos =
+      await api(
+        "deshacer",
+        {
+          id: id,
+          usuario: "WEB"
         }
+      );
 
-      } catch (error) {
 
-        console.error(error);
+    if (datos.exito) {
 
-        alert(
-          "Error de conexión."
-        );
+      alert(
+        "Ingreso deshecho correctamente."
+      );
 
-      }
+
+      await actualizarContador();
+
+      await buscarPersonas();
+
+
+    } else {
+
+      alert(
+        datos.mensaje ||
+        "No se pudo deshacer."
+      );
 
     }
 
 
-    actualizarContador();
+  } catch (error) {
 
-  </script>
+    console.error(error);
+
+
+    alert(
+      "Error de conexión."
+    );
+
+  }
+
+}
+
+
+/* INICIAR */
+
+actualizarContador();
+
+</script>
+
 
 </body>
 
