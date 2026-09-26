@@ -16,10 +16,6 @@
       padding: 30px;
     }
 
-    h1 {
-      margin-bottom: 10px;
-    }
-
     #lectorQR {
       width: 100%;
       max-width: 500px;
@@ -30,6 +26,7 @@
       margin-top: 20px;
       font-size: 24px;
       font-weight: bold;
+      word-break: break-word;
     }
   </style>
 </head>
@@ -38,7 +35,7 @@
 
   <h1>Control de Acceso ANEIB</h1>
 
-  <p>Escanea un código QR para probar la cámara.</p>
+  <p>Escanea un código QR.</p>
 
   <div id="lectorQR"></div>
 
@@ -49,17 +46,97 @@
 
   <script>
 
-    function qrDetectado(texto) {
+    // URL ACTUAL DE NUESTRO BACKEND
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbz9ReIHszmHMsyjp1CkG98saWZ8tw6NqNsvsVY2gxaEXnJHbBNi9YTBX9dIW4zY7MvdjQ/exec";
 
-      document.getElementById("resultado").textContent =
-        "QR detectado: " + texto;
 
-      console.log("QR:", texto);
+    let procesando = false;
+
+
+    async function procesarQR(id) {
+
+      if (procesando) {
+        return;
+      }
+
+      procesando = true;
+
+      const resultado = document.getElementById("resultado");
+
+      resultado.textContent = "Comprobando entrada...";
+
+
+      try {
+
+        const url =
+          API_URL +
+          "?accion=buscar&id=" +
+          encodeURIComponent(id);
+
+
+        const respuesta = await fetch(url);
+
+        const datos = await respuesta.json();
+
+
+        if (!datos.encontrada) {
+
+          resultado.textContent =
+            "❌ ENTRADA NO VÁLIDA";
+
+          return;
+        }
+
+
+        if (
+          String(datos.entrada.estado)
+            .trim()
+            .toUpperCase() === "INGRESADO"
+        ) {
+
+          resultado.textContent =
+            "❌ ENTRADA YA UTILIZADA";
+
+          return;
+        }
+
+
+        // Si existe y está pendiente
+        resultado.textContent =
+          "✅ ENTRADA VÁLIDA — " +
+          datos.entrada.nombre;
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        resultado.textContent =
+          "Error al comunicarse con el servidor.";
+
+      } finally {
+
+        setTimeout(function() {
+          procesando = false;
+        }, 2000);
+
+      }
 
     }
 
 
-    const scanner = new Html5Qrcode("lectorQR");
+    function qrDetectado(texto) {
+
+      console.log("QR detectado:", texto);
+
+      procesarQR(texto);
+
+    }
+
+
+    const scanner =
+      new Html5Qrcode("lectorQR");
 
 
     scanner.start(
@@ -75,13 +152,13 @@
       },
       qrDetectado,
       function(error) {
-        // Ignoramos errores de lectura mientras busca el QR
+        // Ignorar errores normales de lectura
       }
     )
     .catch(function(error) {
 
       document.getElementById("resultado").textContent =
-        "No se pudo acceder a la cámara: " + error;
+        "No se pudo acceder a la cámara.";
 
       console.error(error);
 
